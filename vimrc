@@ -9,7 +9,11 @@ set incsearch       "搜尋時提示目前輸入的字"
 set hlsearch        "提示搜尋結果"
 set cursorline      "底線標註"
 set smartindent     "Enter下一行和原先所在相同縮排,但#和某些符號例外"
+set textwidth=78
 set number
+set mouse=nv
+"insert_mode c-l將游標移至最後"
+:inoremap <C-l> <ESC> A
 syntax on
 filetype off
 
@@ -19,25 +23,28 @@ call vundle#begin('~/.vim/bundle/Vundel.vim')
 
 Plugin 'VundleVim/Vundle.vim' " Plugin 'gmarik/Vundle.vim'
 
-
 Plugin 'bling/vim-airline'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
-"Plugin 'MarcWeber/vim-addon-mw-utils'
-"Plugin 'tomtom/tlib_vim'
-"Plugin 'garbas/vim-snipmate'
 Plugin 'honza/vim-snippets'
 Plugin 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
-"Plugin 'Raimondi/delimitMate'
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'SirVer/ultisnips'
 "c9s大大的註解: normal_mode ",+c"=>註解, ",+C"=>取消註解, ",,"=>line comment"
 Plugin 'c9s/simple-commenter.vim'
-"html emmet 自動補全包含html.erb, insert_mode <c-e> 啟用, insert_mod
+"html emmet 自動補全包含html.erb, insert_mode <c-e> 啟用, insert_mode
 "<c-n>跳至下一個empty_tag 
 Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+"<c-p>搜尋檔案
+Plugin 'ctrlpvim/ctrlp.vim'
+"自動補全...好像滿屌的！
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'taglist.vim'
+Plugin 'jlanzarotta/bufexplorer'
+Plugin 'zenorocha/dracula-theme', {'rtp': 'vim/'}
+
 
 call vundle#end()
 filetype plugin indent on
@@ -45,6 +52,7 @@ filetype plugin indent on
 " set status line
 set laststatus=2
 " enable powerline-fonts
+let g:airline_theme='murmur'
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled=1
 let g:airline#extensions#tabline#buffer_nr_show=1
@@ -76,8 +84,28 @@ au BufWrite /private/tmp/crontab.* set nowritebackup nobackup
 " Don't write backup file if vim is being called by "chpass"
 au BufWrite /private/etc/pw.* set nowritebackup nobackup
 
+"simple_commenter"
 let g:scomment_default_mapping = 1
 
+"YCM
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+let g:ycm_confirm_extra_conf =0
+let g:ycm_filetype_blacklist = { 'gitcommit':1 }
 
-"insert_mode S+Tab將游標移至最後"
-:inoremap <S-tab> <ESC> A
+"在.erb下按＝,- 啟用surround
+autocmd FileType erb let b:surround_{char2nr('=')} = "<%= \r %>"
+autocmd FileType erb let b:surround_{char2nr('-')} = "<% \r %>"
+
+"F1紀錄tag
+nnoremap <F3> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+
+"F2開啟taglist
+nnoremap <silent> <F2> :Tlist <CR>
+
+"開啟時回復上次關閉的位置
+if has("autocmd")
+    au BufReadPost *
+    \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+    \   exe "normal g'\"" |
+    \ endif
+endif
